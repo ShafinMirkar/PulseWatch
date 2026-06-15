@@ -21,7 +21,7 @@ cron.schedule("*/5 * * * * *", async () => {
       isActive: true,
       isProcessing: { $ne: true }
     }).limit(10);
-    console.log(dueMonitors)
+    console.log(dueMonitors.url); 
 
     // create and push jobs
     if(dueMonitors.length > 0){
@@ -34,8 +34,16 @@ cron.schedule("*/5 * * * * *", async () => {
             url: ele.url,
             userId: ele.userId,
             timeoutMs: ele.timeoutMs,
-            intervalSeconds: ele.intervalSeconds
-          })
+            intervalSeconds: ele.intervalSeconds,
+            failureCount: ele.failureCount,
+          },{
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 5000
+            }
+          }
+        )
         }
     }
 });

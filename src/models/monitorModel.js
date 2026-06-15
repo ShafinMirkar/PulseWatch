@@ -60,6 +60,11 @@ const monitorSchema = new mongoose.Schema({
     enum: MonitorStatus
   },
 
+  failureCount: {
+    type: Number,
+    default: 0
+  },
+
   lastCheckedAt: Date,
 
   nextCheckAt: Date,
