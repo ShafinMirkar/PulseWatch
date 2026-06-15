@@ -19,31 +19,38 @@ cron.schedule("*/5 * * * * *", async () => {
     const dueMonitors = await Monitor.find({
       nextCheckAt: { $lte: new Date() },
       isActive: true,
-      isProcessing: { $ne: true }
+      isProcessing: { $ne:  true }
     }).limit(10);
     console.log(dueMonitors.url); 
 
     // create and push jobs
-    if(dueMonitors.length > 0){
-        for (const ele of dueMonitors) {
-          await Monitor.findByIdAndUpdate(ele._id, {
-              isProcessing: true
-          })
-          await myQueue.add('checkResult',{
-            monitorId: ele._id,
-            url: ele.url,
-            userId: ele.userId,
-            timeoutMs: ele.timeoutMs,
-            intervalSeconds: ele.intervalSeconds,
-            failureCount: ele.failureCount,
-          },{
-            attempts: 3,
-            backoff: {
-              type: 'exponential',
-              delay: 5000
+    if(dueMonitors!=null && dueMonitors.length > 0){
+        for (const monitor of dueMonitors) {
+          try {
+            await Monitor.findByIdAndUpdate(monitor._id, {
+                isProcessing: true
+            })
+            await myQueue.add('checkResult',{
+                monitorId: monitor._id,
+                url: monitor.url,
+                userId: monitor.userId,
+                timeoutMs: monitor.timeoutMs,
+                intervalSeconds: monitor.intervalSeconds,
+                failureCount: monitor.failureCount,
+            },{
+                attempts: 3,
+                backoff: {
+                  type: 'exponential',
+                  delay: 5000
+                }
             }
+            )
+          } catch (error) {
+            await Monitor.findByIdAndUpdate(monitor._id, {
+                isProcessing: false
+            })
+            console.log(error)
           }
-        )
         }
     }
 });

@@ -52,7 +52,7 @@ const worker = new Worker('monitorQueue',async job => {
 
       console.log("Monitor ",  url, "is UP and running")
 
-      // check if this was an incident, if yes then redolve it
+      // check if this was an incident, if yes then resolve it
       // check if there was an ongoing incident
       const existingIncident = await Incident.findOne({
         monitorId,
