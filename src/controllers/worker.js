@@ -145,3 +145,11 @@ const worker = new Worker('monitorQueue',async job => {
   },
   { connection }  
 );
+worker.on("failed", (job,err) => {
+  console.error(
+    `Worker itself failed\n
+    job id: ${job?.id}\n
+    job data: ${job?.data}\n
+    error: ${err}\n`
+  );
+})
